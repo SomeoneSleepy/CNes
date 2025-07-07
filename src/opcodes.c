@@ -52,7 +52,7 @@ void handle_command(ppu_t* nes_ppu, cpu_t* nes_cpu, uint8_t value, uint16_t addr
             print_flags(nes_cpu);
             break;
         case STA:
-            printf("STA\nA: %d\n", nes_cpu->A);
+            printf("STA\n");
             cpu_write_mem(nes_ppu, nes_cpu, nes_cpu->mem, addr, nes_cpu->A);
             printf("Memory[%04X] = $%02X\n", addr, nes_cpu->A);
             break;
@@ -76,14 +76,14 @@ void handle_command(ppu_t* nes_ppu, cpu_t* nes_cpu, uint8_t value, uint16_t addr
         case TXS:
             printf("TXS\n");
             nes_cpu->SP = nes_cpu->X;
-            printf("SP: %02X\n", nes_cpu->SP);
+            printf("SP: 0x%02X\n", nes_cpu->SP);
             break;
         case BPL:
             printf("BPL\n");
             print_flags(nes_cpu);
             if(is_flag_clear(nes_cpu, N))
             {
-                nes_cpu->PC += (int8_t) value;
+                nes_cpu->PC += (int8_t) value - 1;
                 printf("Branch taken: new PC = %04X\n", nes_cpu->PC);
             }
             else

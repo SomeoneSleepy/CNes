@@ -13,19 +13,14 @@ typedef struct ppu_t {
     uint8_t PPUADDR;     // $2006
     uint8_t PPUDATA;     // $2007
     uint8_t OAMDMA;      // $4014 (DMA trigger)
-    uint8_t write_toggle; // toggle for $2005/$2006 writes
-
+    
     uint16_t v;          // current VRAM address
     uint16_t t;          // temporary VRAM address
     uint8_t  x;          // fine X scroll
-
-    uint8_t buffered_data; // delayed read buffer for $2007 reads
-
-    uint8_t oam[0x100];    // sprite attribute memory (256 bytes)
-    uint8_t palette[0x20]; // palette RAM (32 bytes)
-
-    int scanline;        // current scanline (-1 to 260)
-    int cycle;           // current cycle (0 to 340)
+    uint8_t w;
+    uint16_t horizontal;
+    uint16_t vertical;
+    uint16_t frame;
 } ppu_t;
 
 

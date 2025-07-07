@@ -31,10 +31,10 @@ typedef struct cpu_t
     uint8_t* mem;
     // opcodes & ticks related
     uint8_t instr;
-    uint8_t low;
-    uint8_t high;
+    uint8_t* addr;
     opcode_info_t opcode;
     uint8_t byte;
+    uint8_t current_operand;
     bool handling_cmd; // is opcode running
 } cpu_t;
 

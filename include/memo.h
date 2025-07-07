@@ -6,9 +6,11 @@
 
 #define MAX_ITEMS 2
 #define ROM 1
+#define LOW 0
+#define HIGH 1
 #define MAX_MEM_SIZE 0x10000
 #define CPU_MEM_SIZE 0x10000
-#define VRAM_SIZE 0x10000
+#define VRAM_SIZE 0x4000
 #define BASE_GAME_SIZE 16384
 #define BASE_TILES_SIZE 8192
 #define RAM_START 0x000

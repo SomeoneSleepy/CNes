@@ -13,6 +13,7 @@ void power_on(cpu_t* cpu)
     cpu->SP = 0xFD;
     cpu->P = 0x24;
     cpu->handling_cmd = false;
+    cpu->current_operand = 0;
 }
 
 void set_flags(cpu_t* nes, uint8_t value)
@@ -71,87 +72,97 @@ void cpu_tick(cpu_t* nes_cpu, ppu_t* nes_ppu)
         nes_cpu->opcode = opcode_table[nes_cpu->instr];
         nes_cpu->byte = nes_cpu->opcode.bytes - 1;
         nes_cpu->handling_cmd = true;
+        nes_cpu->current_operand = 0;
+        memset(nes_cpu->addr, 0, 2 * sizeof(uint8_t));
         return;
     }
-    switch(nes_cpu->byte)
+
+    if(nes_cpu->current_operand == nes_cpu->byte)
     {
-        case 0:
-            cpu_exec_instr(nes_cpu, nes_ppu);
-            nes_cpu->handling_cmd = false;
-            return;
-        case 1:
-            nes_cpu->low = fetch_next(nes_cpu);
-            break;
-        case 2:
-            nes_cpu->high = fetch_next(nes_cpu);
-            break;
-        default:
-            printf("None. %d\n", nes_cpu->byte);
+        cpu_exec_instr(nes_cpu, nes_ppu);
+        nes_cpu->handling_cmd = false;
+        return;
     }
-    nes_cpu->byte -= 1;
+
+    nes_cpu->addr[nes_cpu->current_operand++] = fetch_next(nes_cpu);    
 }
 
 void cpu_exec_instr(cpu_t* nes_cpu, ppu_t* nes_ppu)
 {
     uint8_t value = 0, msb = 0, lsb = 0;
     uint16_t addr = 0;
-    
-    
+
     switch (nes_cpu->opcode.mode)
     {
         case ADDR_IMMEDIATE:
-            value = nes_cpu->low;
+            value = nes_cpu->addr[LOW];
             break;
+
         case ADDR_ZEROPAGE:
-            addr = nes_cpu->low & 0xFF;
+            addr = nes_cpu->addr[LOW];
             value = nes_cpu->mem[addr];
             break;
+
         case ADDR_ZEROPAGE_X:
-            addr = (nes_cpu->low + nes_cpu->X) & 0xFF;
+            addr = (nes_cpu->addr[LOW] + nes_cpu->X) & 0xFF;
             value = nes_cpu->mem[addr];
             break;
+
         case ADDR_ZEROPAGE_Y:
-            addr = (nes_cpu->low + nes_cpu->Y) & 0xFF;
+            addr = (nes_cpu->addr[LOW] + nes_cpu->Y) & 0xFF;
             value = nes_cpu->mem[addr];
             break;
+
         case ADDR_ABSOLUTE:
-            printf("low: %02X, high: %02X\n", nes_cpu->low, nes_cpu->high);
-            addr = make_address(nes_cpu->low, nes_cpu->high);
+            printf("low: %02X, high: %02X\n", nes_cpu->addr[LOW], nes_cpu->addr[HIGH]);
+            addr = make_address(nes_cpu->addr[LOW], nes_cpu->addr[HIGH]);
             value = cpu_read_mem(nes_ppu, addr, nes_cpu->mem);
             break;
+
         case ADDR_ABSOLUTE_X:
-            printf("low: %02X, high: %02X\n", nes_cpu->low, nes_cpu->high);
-            addr = make_address(nes_cpu->low, nes_cpu->high);
-            value = cpu_read_mem(nes_ppu, (addr + nes_cpu->X), nes_cpu->mem);
+            printf("low: %02X, high: %02X\n", nes_cpu->addr[LOW], nes_cpu->addr[HIGH]);
+            addr = make_address(nes_cpu->addr[LOW], nes_cpu->addr[HIGH]) + nes_cpu->X;
+            value = cpu_read_mem(nes_ppu, addr, nes_cpu->mem);
             break;
+
         case ADDR_ABSOLUTE_Y:
-            printf("low: %02X, high: %02X\n", nes_cpu->low, nes_cpu->high);
-            addr = make_address(nes_cpu->low, nes_cpu->high);
-            value = cpu_read_mem(nes_ppu, (addr + nes_cpu->Y), nes_cpu->mem);
+            printf("low: %02X, high: %02X\n", nes_cpu->addr[LOW], nes_cpu->addr[HIGH]);
+            addr = make_address(nes_cpu->addr[LOW], nes_cpu->addr[HIGH]) + nes_cpu->Y;
+            value = cpu_read_mem(nes_ppu, addr, nes_cpu->mem);
             break;
-        case ADDR_INDIRECT_X:
-            lsb = nes_cpu->mem[nes_cpu->low];
-            msb = nes_cpu->mem[(uint8_t)(nes_cpu->low + 1)];
-            addr = make_address(lsb, msb) + nes_cpu->X;
-            value = nes_cpu->mem[addr];
+
+        case ADDR_INDIRECT_X: {
+            uint8_t ptr = (nes_cpu->addr[LOW] + nes_cpu->X) & 0xFF;
+            lsb = nes_cpu->mem[ptr];
+            msb = nes_cpu->mem[(uint8_t)(ptr + 1)];
+            addr = make_address(lsb, msb);
+            value = cpu_read_mem(nes_ppu, addr, nes_cpu->mem);
             break;
+        }
+
         case ADDR_INDIRECT_Y:
-            lsb = nes_cpu->mem[nes_cpu->low];
-            msb = nes_cpu->mem[(uint8_t)(nes_cpu->low + 1)];
+            lsb = nes_cpu->mem[nes_cpu->addr[LOW]];
+            msb = nes_cpu->mem[(uint8_t)(nes_cpu->addr[LOW] + 1)];
             addr = make_address(lsb, msb) + nes_cpu->Y;
-            value = nes_cpu->mem[addr];
+            value = cpu_read_mem(nes_ppu, addr, nes_cpu->mem);
             break;
+
         case ADDR_RELATIVE:
-            value = nes_cpu->low;
+            value = nes_cpu->addr[LOW];
             break;
+
         case ADDR_NONE:
             printf("No address mode\n");
             break;
+
         default:
-            printf("None.");
+            printf("Unknown addressing mode!\n");
+            break;
     }
+
     handle_command(nes_ppu, nes_cpu, value, addr);
 }
+
 
 void cpu_write_mem(ppu_t* ppu, cpu_t* cpu, uint8_t* mem, uint16_t loc, uint8_t value)
 {
@@ -188,10 +199,6 @@ uint8_t cpu_read_mem(ppu_t* ppu, uint16_t loc, uint8_t* mem)
     else if(loc >= 0x2000 && loc <= 0x3FFF)
     {
         return ppu_read_register(ppu, 0x2000 + (loc % 8));
-    }
-    else if(loc == 0x4014)
-    {
-        return ppu_read_register(ppu, loc);
     }
     else
     {
