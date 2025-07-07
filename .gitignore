@@ -1,4 +1,9 @@
 *.exe
 *.txt
+<<<<<<< HEAD
 *.nes
 .vscode/
+=======
+.vscode/
+build/
+>>>>>>> 1d15b808b5b1990397be2648fa1c9ebd3608521e

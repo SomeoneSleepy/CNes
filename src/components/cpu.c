@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "CPU.h"
+#include "cpu.h"
 #include "memo.h"
 #include "opcodes.h"
 

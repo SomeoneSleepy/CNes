@@ -1,8 +1,12 @@
 #pragma once
 
+<<<<<<< HEAD
 #include "PPU.h"
 
 typedef struct cpu_t cpu_t;
+=======
+#include "cpu.h"
+>>>>>>> 1d15b808b5b1990397be2648fa1c9ebd3608521e
 
 typedef enum {
     ADDR_IMMEDIATE,      // e.g. LDA #$10
@@ -38,4 +42,10 @@ typedef struct {
 
 extern opcode_info_t opcode_table[256];
 
+<<<<<<< HEAD
 void handle_command(ppu_t* nes_ppu, cpu_t* nes_cpu, uint8_t value, uint16_t addr);
+=======
+void handle_commands(opcode_info_t operation, ppu_t* nes_ppu, cpu_t* nes_cpu, uint8_t* mem, uint8_t value, uint16_t addr, FILE* log);
+
+#endif
+>>>>>>> 1d15b808b5b1990397be2648fa1c9ebd3608521e

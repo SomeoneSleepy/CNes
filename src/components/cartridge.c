@@ -4,7 +4,7 @@
 #include <string.h>
 #include "cartridge.h"
 #include "memo.h"
-#include "CPU.h"
+#include "cpu.h"
 
 int load_cartridge(char* cart_path, uint8_t* cpu_mem, uint8_t* vram)
 {
