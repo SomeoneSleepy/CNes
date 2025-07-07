@@ -6,7 +6,7 @@
 #include <windows.h>
 #include "cartridge.h"
 #include "memo.h"
-#include "CPU.h"
+#include "cpu.h"
 
 
 int main(int argc, char** argv)
