@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
-#include <windows.h>
 #include "cartridge.h"
 #include "memo.h"
 #include "cpu.h"
