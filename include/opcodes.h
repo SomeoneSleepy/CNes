@@ -1,7 +1,8 @@
-#ifndef OPCODESH
-#define OPCODESH
+#pragma once
 
-#include "CPU.h"
+#include "PPU.h"
+
+typedef struct cpu_t cpu_t;
 
 typedef enum {
     ADDR_IMMEDIATE,      // e.g. LDA #$10
@@ -31,11 +32,10 @@ typedef struct {
     instr_t instr;
     addr_mode_t mode;
     uint8_t cycles;
+    uint8_t bytes;
     int page_cross_penalty; // For indexed modes
 } opcode_info_t;
 
 extern opcode_info_t opcode_table[256];
 
-void handle_commands(opcode_info_t operation, ppu_t* nes_ppu, cpu_t* nes_cpu, uint8_t* mem, uint8_t value, uint16_t addr, FILE* log);
-
-#endif
+void handle_command(ppu_t* nes_ppu, cpu_t* nes_cpu, uint8_t value, uint16_t addr);

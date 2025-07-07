@@ -1,9 +1,13 @@
 #ifndef CPUH
 #define CPUH
 #include "io.h"
-#include "ppu.h"
+#include "PPU.h"
+#include "opcodes.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
+
+#define OPCODE_STR_SIZE 10
 
 enum flags {
     C = 0x01,  // bit 0
@@ -24,17 +28,25 @@ typedef struct cpu_t
     uint16_t PC;    // Program Counter
     uint8_t SP;     // Stack Pointer
     uint8_t P;      // Processor Status (packed flags byte)
-    uint8_t cycles;
+    uint8_t* mem;
+    // opcodes & ticks related
+    uint8_t instr;
+    uint8_t low;
+    uint8_t high;
+    opcode_info_t opcode;
+    uint8_t byte;
+    bool handling_cmd; // is opcode running
 } cpu_t;
 
-void power_on(cpu_t* cpu, uint8_t* cpu_mem);
+void power_on(cpu_t* cpu);
 void set_flags(cpu_t* nes, uint8_t value);
 void clear_flag(cpu_t* cpu, uint8_t bit_mask);
 void set_flag(cpu_t* nes_cpu, uint8_t bit);
 int is_flag_clear(cpu_t* cpu, uint8_t bit);
-uint8_t fetch_next(cpu_t* cpu, uint8_t* mem);
+uint8_t fetch_next(cpu_t* cpu);
 uint16_t make_address(uint8_t low, uint8_t high);
-int cpu_exec_instr(ppu_t* ppu, cpu_t* nes_cpu, uint8_t* mem, FILE* log);
+void cpu_tick(cpu_t* nes_cpu, ppu_t* nes_ppu);
+void cpu_exec_instr(cpu_t* nes_cpu, ppu_t* nes_ppu);
 void print_flags(cpu_t* nes_cpu);
 void cpu_write_mem(ppu_t* ppu, cpu_t* cpu, uint8_t* mem, uint16_t loc, uint8_t value);
 uint8_t cpu_read_mem(ppu_t* ppu, uint16_t loc, uint8_t* mem);
