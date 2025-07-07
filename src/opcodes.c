@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "opcodes.h"
-#include "CPU.h"
+#include "cpu.h"
 
 opcode_info_t opcode_table[256] = {
     [0x10] = { BPL, ADDR_RELATIVE,    2, true  }, // Branch if Positive

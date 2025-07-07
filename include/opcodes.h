@@ -1,7 +1,7 @@
 #ifndef OPCODESH
 #define OPCODESH
 
-#include "CPU.h"
+#include "cpu.h"
 
 typedef enum {
     ADDR_IMMEDIATE,      // e.g. LDA #$10
